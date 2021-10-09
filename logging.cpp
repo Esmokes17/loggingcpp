@@ -20,13 +20,14 @@ std::string Logging::stdOutputLog(Level level,
                 std::string function,
                 int line){
     
+    // convert level to string
     std::string strLevel = "";
     switch (level){
     case Info:
         strLevel = "INFO";
         break;
-    case Warnning:
-        strLevel = "WARNNING";
+    case Warning:
+        strLevel = "WARNING";
         break;
     case Error:
         strLevel = "ERROR";
@@ -37,6 +38,7 @@ std::string Logging::stdOutputLog(Level level,
         break;
     }
 
+    // formatting the date
     std::string newDate = "";
     for(int i = 0 ; i < config.dateFormat.length() ; i++){
         if(config.dateFormat[i] == '{'){
@@ -76,6 +78,7 @@ std::string Logging::stdOutputLog(Level level,
         }
     }
 
+    // formatting output
     std::string output = "";
     for(int i = 0 ; i < config.format.length() ; i++){
         if(config.format[i] == '{'){
@@ -107,10 +110,12 @@ void Logging::writeFile(Level level,
             std::string function,
             int line){
     
+    // chaeck at least level for writing
     if(level < config.level)
         return;
 
     std::ofstream out;
+    // chaeck if is first time call function remove datas in the file 
     if(!isFirstTime){
         isFirstTime = true;
         out.open(config.fileName, std::ios::out | std::ios::trunc);
