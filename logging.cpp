@@ -1,7 +1,10 @@
 #include "logging.h"
 
-LOG_CONF Logging::config;
+LOG_CONF* Logging::config = new LOG_CONF();
 bool Logging::isFirstTime = false;
+
+std::string Logging::lastOutput;
+std::string Logging::buffer;
 
 std::string Logging::erase_space(std::string str){
     std::string res = "";
@@ -12,45 +15,19 @@ std::string Logging::erase_space(std::string str){
     return res;
 }
 
-std::string Logging::stdOutputLog(Level level,
-                std::string message,
-                std::string date,
-                std::string time,
-                std::string file,
-                std::string function,
-                int line){
-    
-    // convert level to string
-    std::string strLevel = "";
-    switch (level){
-    case Info:
-        strLevel = "INFO";
-        break;
-    case Warning:
-        strLevel = "WARNING";
-        break;
-    case Error:
-        strLevel = "ERROR";
-        break;
-    case Critical:
-        strLevel = "CRITICAL";
-    default:
-        break;
-    }
-
-    // formatting the date
+std::string Logging::formattingDate(std::string date){
     std::string newDate = "";
-    for(int i = 0 ; i < config.dateFormat.length() ; i++){
-        if(config.dateFormat[i] == '{'){
+    for(int i = 0 ; i < config->dateFormat.length() ; i++){
+        if(config->dateFormat[i] == '{'){
             i++;
             int begin = i;
-            while(config.dateFormat[i] != '}')
+            while(config->dateFormat[i] != '}')
                 i++;
-            
-            std::string word_date = config.dateFormat.substr(begin, i-begin);
+
+            std::string word_date = config->dateFormat.substr(begin, i-begin);
             if(word_date == "month"){
                 std::string month = date.substr(0, 3);
-                if(config.dateFormat.at(++i) == 'n'){
+                if(config->dateFormat.at(++i) == 'n'){
                     if(month == "Jan")          month = "1";
                     else if(month == "Feb")     month = "2";
                     else if(month == "Mar")     month = "3";
@@ -74,21 +51,51 @@ std::string Logging::stdOutputLog(Level level,
             }
         }
         else{
-            newDate += config.dateFormat.at(i);
+            newDate += config->dateFormat.at(i);
         }
     }
+    return newDate;
+}
+
+std::string Logging::stdOutputLog(Level level,
+                std::string message,
+                std::string date,
+                std::string time,
+                std::string file,
+                std::string function,
+                int line){
+
+    // convert level to string
+    std::string strLevel = "";
+    switch (level){
+    case Info:
+        strLevel = "INFO";
+        break;
+    case Warning:
+        strLevel = "WARNING";
+        break;
+    case Error:
+        strLevel = "ERROR";
+        break;
+    case Critical:
+        strLevel = "CRITICAL";
+    default:
+        break;
+    }
+
+    date = formattingDate(date);
 
     // formatting output
     std::string output = "";
-    for(int i = 0 ; i < config.format.length() ; i++){
-        if(config.format[i] == '{'){
+    for(int i = 0 ; i < config->format.length() ; i++){
+        if(config->format[i] == '{'){
             i++;
             int begin = i;
-            while(config.format[i] != '}')
+            while(config->format[i] != '}')
                 i++;
-            
-            std::string word = config.format.substr(begin, i-begin);
-            if(word == "date")          output += newDate;
+
+            std::string word = config->format.substr(begin, i-begin);
+            if(word == "date")          output += date;
             else if(word == "time")     output += time;
             else if(word == "file")     output += file;
             else if(word == "func")     output += function;
@@ -97,7 +104,7 @@ std::string Logging::stdOutputLog(Level level,
             else if(word == "message")  output += message;
         }
         else
-            output += config.format[i];
+            output += config->format[i];
     }
     return output;
 }
@@ -109,21 +116,22 @@ void Logging::writeFile(Level level,
             std::string file,
             std::string function,
             int line){
-    
+
     // chaeck at least level for writing
-    if(level < config.level)
+    if(level < config->level)
         return;
 
     std::ofstream out;
-    // chaeck if is first time call function remove datas in the file 
+    // chaeck if is first time call function remove datas in the file
     if(!isFirstTime){
         isFirstTime = true;
-        out.open(config.fileName, std::ios::out | std::ios::trunc);
+        out.open(config->fileName, std::ios::out | std::ios::trunc);
     }
     else{
-        out.open(config.fileName, std::ios::out | std::ios::app);
+        out.open(config->fileName, std::ios::out | std::ios::app);
     }
-    out << stdOutputLog(level, message, date, time, file, function, line) << std::endl;
+    lastOutput = stdOutputLog(level, message, date, time, file, function, line);
+    out << lastOutput << std::endl;
     out.flush();
     out.close();
 }
@@ -135,6 +143,16 @@ void Logging::writeConsole(Level level,
             std::string file,
             std::string function,
             int line){
-
-    std::cout << stdOutputLog(level, message, date, time, file, function, line) << std::endl;
+    
+    if(level < config->level)
+        return;
+    
+    lastOutput = stdOutputLog(level, message, date, time, file, function, line);
+    std::cout << lastOutput << std::endl;
 }
+
+void Logging::reset(){
+    config = new LOG_CONF();
+    buffer = "";
+    lastOutput = "";
+};
