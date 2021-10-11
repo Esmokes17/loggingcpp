@@ -1,0 +1,13 @@
+.git/
+.vscode/
+.vs/
+
+/test/build
+
+*.exe
+*.bin
+*.o
+*.out
+
+*.log
+*.md
