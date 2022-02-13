@@ -35,7 +35,7 @@ typedef struct LogConfing{
 class Logging{
     private:
         static LOG_CONF* config;
-        static bool isFirstTime;
+        static bool isCallBefore;
         static std::string lastOutput;  //for test
 		static std::string buffer;
         static std::string erase_space(std::string);

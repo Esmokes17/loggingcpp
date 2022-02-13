@@ -3,21 +3,21 @@
 #define consoleOut_written ASSERT_NE(buffer.str().length(), 0)
 #define fileOut_written ASSERT_NE(data.length(), 0)
 
-#define consoleOut_asert ASSERT_EQ(buffer.str(), Logging::getLastOutput()+(char)(0x0A));
+#define consoleOut_assert ASSERT_EQ(buffer.str(), Logging::getLastOutput()+(char)(0x0A));
 #define fileOut_assert ASSERT_EQ(data, Logging::getLastOutput());
 #define clean(fileName) std::remove(fileName);
 
 TEST_F(OutputConsoleFixture, console_output_default){
     logConsole("console_output_default", Info);
     consoleOut_written;
-    consoleOut_asert;
+    consoleOut_assert;
 }
 
 TEST_F(OutputConsoleFixture, console_output_anotherFormat){
     Logging::setFormat("{level} - {message}");
     logConsole("console_output_anotherFormar", Error);
     consoleOut_written;
-    consoleOut_asert;
+    consoleOut_assert;
 }
 
 TEST_F(OutputConsoleFixture, console_output_levelStat1){
@@ -30,14 +30,14 @@ TEST_F(OutputConsoleFixture, console_output_levelStat2){
     Logging::setLevel(Error);
     logConsole("console_output_levelStat2", Error);
     consoleOut_written;
-    consoleOut_asert;
+    consoleOut_assert;
 }
 
 TEST_F(OutputConsoleFixture, console_output_levelStat3){
     Logging::setLevel(Error);
     logConsole("console_output_levelStat3", Critical);
     consoleOut_written;
-    consoleOut_asert;
+    consoleOut_assert;
 }
 
 TEST_F(OutputFileFixture, clean_file_output){

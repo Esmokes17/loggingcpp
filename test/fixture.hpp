@@ -10,14 +10,14 @@
 class FormatFixure : public ::testing::Test{
     protected:
         void SetUp(){ Logging::reset(); }
-        // ~FormatFixure();
 };
 
-static std::stringstream buffer;
 class OutputConsoleFixture : public ::testing::Test{
     protected:
+        std::stringstream buffer;
         void SetUp(){
             Logging::reset();
+            buffer.str("");
             sbuf = std::cout.rdbuf();
             std::cout.rdbuf(buffer.rdbuf());
         }

@@ -1,7 +1,7 @@
 #include "logging.h"
 
 LOG_CONF* Logging::config = new LOG_CONF();
-bool Logging::isFirstTime = false;
+bool Logging::isCallBefore = false;
 
 std::string Logging::lastOutput;
 std::string Logging::buffer;
@@ -122,9 +122,9 @@ void Logging::writeFile(Level level,
         return;
 
     std::ofstream out;
-    // chaeck if is first time call function remove datas in the file
-    if(!isFirstTime){
-        isFirstTime = true;
+    // chaeck if is first time call function remove data in the file
+    if(!isCallBefore){
+        isCallBefore = true;
         out.open(config->fileName, std::ios::out | std::ios::trunc);
     }
     else{
@@ -155,4 +155,5 @@ void Logging::reset(){
     config = new LOG_CONF();
     buffer = "";
     lastOutput = "";
+    isCallBefore = false;
 };
